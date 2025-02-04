@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { useState, useRef, useEffect } from "react";
 import { SendIcon, UserIcon, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,54 +13,35 @@ interface Message {
   status?: "typing" | "complete";
 }
 
-export default function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const scrollRef = useRef<HTMLDivElement | null>(null); 
-  const [chatStarted, setChatStarted] = useState(false); 
+interface ChatInterfaceProps {
+  readonly messages: Message[];
+  readonly input: string;
+  readonly handleSubmit: (e: React.FormEvent) => void;
+  readonly setInput: React.Dispatch<React.SetStateAction<string>>;
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: input,
-      role: "user",
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setChatStarted(true); // Mark the chat as started
-
-    // Fetch response from API
-    const fetchResponse = await fetch("http://localhost:3000/api/chat", {
-      method: "POST",
-      body: JSON.stringify({ input: input }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const { answer } = await fetchResponse.json(); 
-
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      content: answer, 
-      role: "assistant",
-    };
-    setMessages((prev) => [...prev, assistantMessage]);
-  };
+export default function ChatInterface({
+  messages,
+  input,
+  handleSubmit,
+  setInput,
+}: ChatInterfaceProps) {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [chatStarted, setChatStarted] = useState(false);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
+    // Set chatStarted to true once there is at least one message
+    if (messages.length > 0) {
+      setChatStarted(true);
+    }
   }, [messages]);
 
   return (
     <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1 px-4 py-6" ref={scrollRef}> 
+      <ScrollArea className="flex-1 px-4 py-6" ref={scrollRef}>
         <div className="max-w-3xl mx-auto space-y-6">
           {!chatStarted && (
             <div className="group flex gap-4 p-4 rounded-2xl transition-all duration-300 bg-accent/40">
@@ -77,9 +58,10 @@ export default function ChatInterface() {
               </div>
             </div>
           )}
-          {messages.map((message) => (
+          {/* Render the messages */}
+          {messages.map((message, id) => (
             <div
-              key={message.id}
+              key={id}
               className={cn(
                 "group flex gap-4 p-4 rounded-2xl transition-all duration-300",
                 message.role === "assistant"
@@ -102,9 +84,7 @@ export default function ChatInterface() {
                 <div className="text-sm font-medium">
                   {message.role === "assistant" ? "Nova AI" : "You"}
                 </div>
-                <div className="text-sm leading-relaxed">
-                  {message.content}
-                </div>
+                <div className="text-sm leading-relaxed">{message.content}</div>
               </div>
             </div>
           ))}

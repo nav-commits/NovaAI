@@ -1,21 +1,22 @@
 "use client";
-import ChatInterface from "@/components/ChatInterface";
-import { useEffect, useState } from "react";
+
+import { useParams} from "next/navigation";
+import { useState,useEffect } from "react";
 import Layout from "@/components/layout";
-import { useRouter } from "next/navigation";
+import ChatInterface from "@/components/ChatInterface";
 
-type Message = {
-  id: string;
-  content: string;
-  role: "user" | "assistant";
-};
+const ChatPage = () => {
+  const { chatId } = useParams();
+  interface Message {
+    id: string;
+    content: string;
+    role: "user" | "assistant"; // Add the role to the Message interface
+  }
 
-export default function Home() {
-  const router = useRouter();
-  const [chats, setChats] = useState<{ chat_id: string; name: string }[]>([]);
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [chats, setChats] = useState<{ chat_id: string; name: string }[]>([]);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,16 +31,15 @@ export default function Home() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
-    // Fetch response from API
     const fetchResponse = await fetch("http://localhost:3000/api/chat", {
       method: "POST",
-      body: JSON.stringify({ input: input }),
+      body: JSON.stringify({ input: input, chatId }),
       headers: {
         "Content-Type": "application/json",
       },
     });
 
-    const { answer, chatId } = await fetchResponse.json();
+    const { answer } = await fetchResponse.json();
 
     const assistantMessage: Message = {
       id: (Date.now() + 1).toString(),
@@ -47,16 +47,36 @@ export default function Home() {
       role: "assistant",
     };
     setMessages((prev) => [...prev, assistantMessage]);
-    router.push(`chat/${chatId}`);
   };
-  // Fetch chat data from API
+
+  useEffect(() => {
+    const fetchChatById = async () => {
+      if (!chatId) return;
+
+      try {
+        const res = await fetch(
+          `http://localhost:3000/api/chat?chatId=${chatId}`
+        );
+        if (!res.ok) {
+          console.error("Failed to fetch:", res.statusText);
+          throw new Error("Failed to fetch chat");
+        }
+        const data = await res.json();
+        setMessages(data.messages);
+      } catch (error) {
+        console.error("Error fetching chat by ID:", error);
+      }
+    };
+    fetchChatById();
+  }, [chatId]);
+
   useEffect(() => {
     async function fetchChats() {
       try {
         const res = await fetch("http://localhost:3000/api/chat");
         if (!res.ok) throw new Error("Failed to fetch chats");
         const data = await res.json();
-        setChats(data); // Assuming API returns an array of { chat_id, name }
+        setChats(data);
       } catch (error) {
         console.error("Error fetching chats:", error);
       }
@@ -64,22 +84,17 @@ export default function Home() {
     fetchChats();
   }, []);
 
-  // Delete chat function
   const handleDeleteChat = async (chatId: string) => {
     try {
-      const res = await fetch(
-        `http://localhost:3000/api/chat?chatId=${chatId}`,
-        {
-          method: "DELETE", // Ensure the correct HTTP method
-        }
-      );
+      const res = await fetch(`http://localhost:3000/api/chat?chatId=${chatId}`, {
+        method: "DELETE",
+      });
+
       if (!res.ok) {
         throw new Error("Failed to delete chat");
       }
-      // Remove the chat from the state after successful deletion
-      setChats((prevChats) =>
-        prevChats.filter((chat) => chat.chat_id !== chatId)
-      );
+
+      setChats((prevChats) => prevChats.filter((chat) => chat.chat_id !== chatId));
     } catch (error) {
       console.error("Error deleting chat:", error);
     }
@@ -102,4 +117,6 @@ export default function Home() {
       </div>
     </Layout>
   );
-}
+};
+
+export default ChatPage;
