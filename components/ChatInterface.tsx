@@ -1,11 +1,10 @@
-'use client'
+"use client";
 import { useState, useRef, useEffect } from "react";
 import { SendIcon, UserIcon, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation"; 
 
 interface Message {
   id: string;
@@ -14,56 +13,29 @@ interface Message {
   status?: "typing" | "complete";
 }
 
-export default function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([]);
+interface ChatInterfaceProps {
+  readonly messages: Message[];
+  readonly input: string;
+  readonly handleSubmit: (e: React.FormEvent) => void;
+  readonly setInput: React.Dispatch<React.SetStateAction<string>>;
+}
 
-  const [input, setInput] = useState("");
+export default function ChatInterface({
+  messages,
+  input,
+  handleSubmit,
+  setInput,
+}: ChatInterfaceProps) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [chatStarted, setChatStarted] = useState(false);
-  const router = useRouter();  
-
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: input,
-      role: "user",
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setChatStarted(true);
-
-    // Fetch response from API
-    const fetchResponse = await fetch("http://localhost:3000/api/chat", {
-      method: "POST",
-      body: JSON.stringify({ input: input }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const { answer, chatId } = await fetchResponse.json();
-
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      content: answer,
-      role: "assistant",
-    };
-    setMessages((prev) => [...prev, assistantMessage]);
-
-    // Ensure `router.push()` is only called on client-side (after component mounts)
-     console.log(chatId);
-      router.push(`chat/${chatId}`);
-    
-  };
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+    // Set chatStarted to true once there is at least one message
+    if (messages.length > 0) {
+      setChatStarted(true);
     }
   }, [messages]);
 
@@ -86,9 +58,10 @@ export default function ChatInterface() {
               </div>
             </div>
           )}
-          {messages.map((message) => (
+          {/* Render the messages */}
+          {messages.map((message, id) => (
             <div
-              key={message.id}
+              key={id}
               className={cn(
                 "group flex gap-4 p-4 rounded-2xl transition-all duration-300",
                 message.role === "assistant"
@@ -111,9 +84,7 @@ export default function ChatInterface() {
                 <div className="text-sm font-medium">
                   {message.role === "assistant" ? "Nova AI" : "You"}
                 </div>
-                <div className="text-sm leading-relaxed">
-                  {message.content}
-                </div>
+                <div className="text-sm leading-relaxed">{message.content}</div>
               </div>
             </div>
           ))}

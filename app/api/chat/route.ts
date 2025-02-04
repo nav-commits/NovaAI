@@ -14,9 +14,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Helper function to generate a unique name
 const generateUniqueName = () => {
-  const words = ['AI', 'User', 'Bot', 'Helper', 'Assistant']; // Possible prefixes
+  const words = ["AI", "User", "Bot", "Helper", "Assistant"];
   const randomWord = words[Math.floor(Math.random() * words.length)];
-  const randomString = uuidv4().split('-')[0]; // Get the first part of UUID for uniqueness
+  const randomString = uuidv4().split("-")[0];
   return `${randomWord}-${randomString}`;
 };
 
@@ -38,7 +38,6 @@ export async function POST(req: NextRequest) {
         out += chunk.choices[0].delta.content;
       }
     }
-
     // Check if chatId exists in database
     if (chatId) {
       // Append message to existing chat
@@ -90,6 +89,64 @@ export async function POST(req: NextRequest) {
         status: 200,
       });
     }
+  } catch (error) {
+    return new Response(JSON.stringify({ error: (error as any).message }), {
+      status: 500,
+    });
+  }
+}
+
+// get call for each id or all chats
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const chatId = searchParams.get("chatId");
+
+    if (chatId) {
+      // Fetch a specific chat by ID
+      const { data, error } = await supabase
+        .from("chats")
+        .select("messages")
+        .eq("chat_id", chatId)
+        .single();
+
+      if (error) throw error;
+
+      return new Response(JSON.stringify(data), { status: 200 });
+    } else {
+      // Fetch all chats
+      const { data, error } = await supabase.from("chats").select("*");
+
+      if (error) throw error;
+
+      return new Response(JSON.stringify(data), { status: 200 });
+    }
+  } catch (error) {
+    return new Response(JSON.stringify({ error: (error as any).message }), {
+      status: 500,
+    });
+  }
+}
+
+// delete call for each id
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const chatId = searchParams.get("chatId");
+    if (!chatId) {
+      return new Response(JSON.stringify({ error: "Missing chatId" }), {
+        status: 400,
+      });
+    }
+    const { error } = await supabase
+      .from("chats")
+      .delete()
+      .eq("chat_id", chatId);
+
+    if (error) throw error;
+    return new Response(JSON.stringify({ message: "Chat deleted" }), {
+      status: 200,
+    });
   } catch (error) {
     return new Response(JSON.stringify({ error: (error as any).message }), {
       status: 500,
