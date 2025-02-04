@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -19,10 +20,14 @@ export default function Home() {
             <span className="text-primary font-bold text-lg">AI</span>
           </div>
           <div>
-            <h2 className="font-semibold text-lg">Nova AI</h2>
-            <p className="text-xs text-muted-foreground">
-              Quantum-Enhanced Assistant
-            </p>
+            <Link href="/">
+              <div>
+                <h2 className="font-semibold text-lg">Nova AI</h2>
+                <p className="text-xs text-muted-foreground">
+                  Quantum-Enhanced Assistant
+                </p>
+              </div>
+            </Link>
           </div>
         </div>
 

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation"; 
 
 interface Message {
   id: string;
@@ -15,9 +16,12 @@ interface Message {
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
+
   const [input, setInput] = useState("");
-  const scrollRef = useRef<HTMLDivElement | null>(null); 
-  const [chatStarted, setChatStarted] = useState(false); 
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [chatStarted, setChatStarted] = useState(false);
+  const router = useRouter();  
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +35,7 @@ export default function ChatInterface() {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
-    setChatStarted(true); // Mark the chat as started
+    setChatStarted(true);
 
     // Fetch response from API
     const fetchResponse = await fetch("http://localhost:3000/api/chat", {
@@ -42,14 +46,19 @@ export default function ChatInterface() {
       },
     });
 
-    const { answer } = await fetchResponse.json(); 
+    const { answer, chatId } = await fetchResponse.json();
 
     const assistantMessage: Message = {
       id: (Date.now() + 1).toString(),
-      content: answer, 
+      content: answer,
       role: "assistant",
     };
     setMessages((prev) => [...prev, assistantMessage]);
+
+    // Ensure `router.push()` is only called on client-side (after component mounts)
+     console.log(chatId);
+      router.push(`chat/${chatId}`);
+    
   };
 
   useEffect(() => {
@@ -60,7 +69,7 @@ export default function ChatInterface() {
 
   return (
     <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1 px-4 py-6" ref={scrollRef}> 
+      <ScrollArea className="flex-1 px-4 py-6" ref={scrollRef}>
         <div className="max-w-3xl mx-auto space-y-6">
           {!chatStarted && (
             <div className="group flex gap-4 p-4 rounded-2xl transition-all duration-300 bg-accent/40">
