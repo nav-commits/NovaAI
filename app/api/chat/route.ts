@@ -15,7 +15,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Helper function to generate a unique name
 const generateChatName = (input: string) => {
   const cleanInput = input.replace(/[^a-zA-Z0-9 ]/g, "").trim();
-  const words = cleanInput.split(" ").slice(0, 5).join(" ");
+  const words = cleanInput.split(" ").slice(0, 5).join(" "); 
   return words || `Chat-${uuidv4().split("-")[0]}`;
 };
 export async function POST(req: NextRequest) {
