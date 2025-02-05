@@ -56,7 +56,7 @@ export default function Home() {
         const res = await fetch("http://localhost:3000/api/chat");
         if (!res.ok) throw new Error("Failed to fetch chats");
         const data = await res.json();
-        setChats(data); // Assuming API returns an array of { chat_id, name }
+        setChats(data); 
       } catch (error) {
         console.error("Error fetching chats:", error);
       }
@@ -70,13 +70,12 @@ export default function Home() {
       const res = await fetch(
         `http://localhost:3000/api/chat?chatId=${chatId}`,
         {
-          method: "DELETE", // Ensure the correct HTTP method
+          method: "DELETE",
         }
       );
       if (!res.ok) {
         throw new Error("Failed to delete chat");
       }
-      // Remove the chat from the state after successful deletion
       setChats((prevChats) =>
         prevChats.filter((chat) => chat.chat_id !== chatId)
       );

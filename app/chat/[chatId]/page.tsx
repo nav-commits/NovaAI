@@ -10,7 +10,7 @@ const ChatPage = () => {
   interface Message {
     id: string;
     content: string;
-    role: "user" | "assistant"; // Add the role to the Message interface
+    role: "user" | "assistant"; 
   }
 
   const [messages, setMessages] = useState<Message[]>([]);
