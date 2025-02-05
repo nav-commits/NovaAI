@@ -1,5 +1,4 @@
 'use client';
-
 import * as React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -8,16 +7,13 @@ import { Button } from '@/components/ui/button';
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
-
-  // Ensures that the theme is only rendered on the client
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
   if (!mounted) {
-    return null; // Avoid rendering until client-side hydration is complete
+    return null; 
   }
-
   return (
     <Button
       variant="ghost"
