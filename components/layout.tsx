@@ -90,13 +90,14 @@ const Layout: FC<LayoutProps> = ({
                     </Dialog.Trigger>
 
                     {/* Delete Confirmation Dialog */}
+                    {/* Delete Confirmation Dialog */}
                     <Dialog.Portal>
-                      <Dialog.Overlay className="fixed inset-0 bg-black/30" />
-                      <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded-lg shadow-lg w-80">
-                        <Dialog.Title className="text-lg font-semibold">
+                      <Dialog.Overlay className="fixed inset-0 bg-black/30 z-[60]" />
+                      <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-black p-4 rounded-lg shadow-lg w-80 z-[70]">
+                        <Dialog.Title className="text-lg font-semibold text-black dark:text-white">
                           Delete Chat
                         </Dialog.Title>
-                        <Dialog.Description className="mt-2 text-sm">
+                        <Dialog.Description className="mt-2 text-sm text-black dark:text-white">
                           Are you sure you want to delete this chat? This action
                           cannot be undone.
                         </Dialog.Description>
@@ -112,7 +113,7 @@ const Layout: FC<LayoutProps> = ({
                             onClick={() => {
                               if (selectedChatId) {
                                 handleDeleteChat(selectedChatId);
-                                setSelectedChatId(null); 
+                                setSelectedChatId(null);
                               }
                             }}
                           >
@@ -152,7 +153,9 @@ const Layout: FC<LayoutProps> = ({
         <div className="fixed inset-0 bg-black/40 z-50 md:hidden">
           <div className="fixed left-0 top-0 h-full w-64 bg-background p-4 shadow-lg">
             <div className="flex justify-between items-center">
-              <h2 className="font-semibold text-lg">Nova AI</h2>
+              <Link href="/">
+                <h2 className="font-semibold text-lg">Nova AI</h2>
+              </Link>
               <button onClick={() => setIsSidebarOpen(false)}>
                 <X className="w-6 h-6 text-primary" />
               </button>
@@ -192,11 +195,11 @@ const Layout: FC<LayoutProps> = ({
                         {/* Delete Confirmation Dialog */}
                         <Dialog.Portal>
                           <Dialog.Overlay className="fixed inset-0 bg-black/30 z-[60]" />
-                          <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded-lg shadow-lg w-80 z-[70]">
-                            <Dialog.Title className="text-lg font-semibold">
+                          <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-black p-4 rounded-lg shadow-lg w-80 z-[70]">
+                            <Dialog.Title className="text-lg font-semibold text-black dark:text-white">
                               Delete Chat
                             </Dialog.Title>
-                            <Dialog.Description className="mt-2 text-sm">
+                            <Dialog.Description className="mt-2 text-sm text-black dark:text-white">
                               Are you sure you want to delete this chat? This
                               action cannot be undone.
                             </Dialog.Description>
@@ -212,7 +215,7 @@ const Layout: FC<LayoutProps> = ({
                                 onClick={() => {
                                   if (selectedChatId) {
                                     handleDeleteChat(selectedChatId);
-                                    setSelectedChatId(null); 
+                                    setSelectedChatId(null);
                                   }
                                 }}
                               >

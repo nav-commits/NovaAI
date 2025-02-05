@@ -30,7 +30,6 @@ export default function Home() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
-    // Fetch response from API
     const fetchResponse = await fetch("http://localhost:3000/api/chat", {
       method: "POST",
       body: JSON.stringify({ input: input }),
@@ -56,7 +55,7 @@ export default function Home() {
         const res = await fetch("http://localhost:3000/api/chat");
         if (!res.ok) throw new Error("Failed to fetch chats");
         const data = await res.json();
-        setChats(data); 
+        setChats(data);
       } catch (error) {
         console.error("Error fetching chats:", error);
       }

@@ -4,7 +4,7 @@ import { useParams} from "next/navigation";
 import { useState,useEffect } from "react";
 import Layout from "@/components/layout";
 import ChatInterface from "@/components/ChatInterface";
-
+import { useRouter } from "next/navigation";
 const ChatPage = () => {
   const { chatId } = useParams();
   interface Message {
@@ -17,7 +17,7 @@ const ChatPage = () => {
   const [input, setInput] = useState("");
   const [chats, setChats] = useState<{ chat_id: string; name: string }[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-
+  const router = useRouter();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -95,6 +95,7 @@ const ChatPage = () => {
       }
 
       setChats((prevChats) => prevChats.filter((chat) => chat.chat_id !== chatId));
+      router.push("/")
     } catch (error) {
       console.error("Error deleting chat:", error);
     }

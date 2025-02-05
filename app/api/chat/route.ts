@@ -13,13 +13,11 @@ const supabaseKey = process.env.SUPABASE_KEY as string;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Helper function to generate a unique name
-const generateUniqueName = () => {
-  const words = ["AI", "User", "Bot", "Helper", "Assistant"];
-  const randomWord = words[Math.floor(Math.random() * words.length)];
-  const randomString = uuidv4().split("-")[0];
-  return `${randomWord}-${randomString}`;
+const generateChatName = (input: string) => {
+  const cleanInput = input.replace(/[^a-zA-Z0-9 ]/g, "").trim();
+  const words = cleanInput.split(" ").slice(0, 5).join(" ");
+  return words || `Chat-${uuidv4().split("-")[0]}`;
 };
-
 export async function POST(req: NextRequest) {
   try {
     const { input, chatId } = await req.json();
@@ -68,7 +66,7 @@ export async function POST(req: NextRequest) {
     } else {
       // Generate new chat ID and save new conversation
       const newChatId = uuidv4();
-      const name = generateUniqueName();
+      const name = generateChatName(input);
 
       const messageData = {
         chat_id: newChatId,
