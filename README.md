@@ -1,3 +1,5 @@
+
+
 # NovaAI - AI-Powered Chatbot with Gemma 2 & Hugging Face API
 
 NovaAI is an AI-powered chatbot application built using **Next.js**, **TypeScript**, and **Hugging Face's google/gemma-2-2b-it** model. The project integrates cutting-edge AI technology to provide real-time conversational capabilities with a modern, responsive frontend built using **Tailwind CSS** and **Radix UI**.
@@ -26,4 +28,3 @@ To run the project locally:
    git clone https://github.com/nav-commits/NovaAI.git
    cd NovaAI
    
-url: https://nova-ai-neon.vercel.app/
