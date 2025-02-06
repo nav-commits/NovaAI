@@ -30,8 +30,6 @@ To run the project locally:
    git clone https://github.com/nav-commits/NovaAI.git
    cd NovaAI
    
-### Watch the Screen Recording
-[Click here to watch the screen recording](Screen%20Recording%202025-02-06%20at%203.53.37%20PM.mov)
 
 
 
