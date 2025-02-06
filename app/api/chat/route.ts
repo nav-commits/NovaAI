@@ -22,8 +22,7 @@ const generateChatName = (input: string) => {
 export async function POST(req: NextRequest) {
   const session = await getToken({ req });
 
-  // If no session, return an error
-  if (!session) {
+  if (!session?.sub) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
     });
@@ -33,29 +32,33 @@ export async function POST(req: NextRequest) {
     const { input, chatId } = await req.json();
     let out = "";
 
-    // Call Hugging Face model API
     const stream = client.chatCompletionStream({
       model: "google/gemma-2-2b-it",
       messages: [{ role: "user", content: input }],
       max_tokens: 500,
     });
 
-    // Wait for the stream to return content
     for await (const chunk of stream) {
       if (chunk.choices && chunk.choices.length > 0) {
         out += chunk.choices[0].delta.content;
       }
     }
 
-    // Continue your existing logic (updating or creating chats)
+    const userId = session.sub; // Unique user ID from NextAuth session
+
     if (chatId) {
       const { data, error } = await supabase
         .from("chats")
-        .select("messages")
+        .select("messages, user_id")
         .eq("chat_id", chatId)
         .single();
 
       if (error) throw error;
+      if (data.user_id !== userId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+        });
+      }
 
       const updatedMessages = [
         ...data.messages,
@@ -79,6 +82,7 @@ export async function POST(req: NextRequest) {
 
       const messageData = {
         chat_id: newChatId,
+        user_id: userId,
         name,
         messages: [
           { role: "user", content: input },
@@ -108,8 +112,7 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const session = await getToken({ req });
 
-  // If no session, return an error
-  if (!session) {
+  if (!session?.sub) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
     });
@@ -118,19 +121,28 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const chatId = searchParams.get("chatId");
+    const userId = session.sub;
 
     if (chatId) {
       const { data, error } = await supabase
         .from("chats")
-        .select("messages")
+        .select("messages, user_id")
         .eq("chat_id", chatId)
         .single();
 
       if (error) throw error;
+      if (data.user_id !== userId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+        });
+      }
 
       return new Response(JSON.stringify(data), { status: 200 });
     } else {
-      const { data, error } = await supabase.from("chats").select("*");
+      const { data, error } = await supabase
+        .from("chats")
+        .select("*")
+        .eq("user_id", userId); // Fetch only the logged-in user's chats
 
       if (error) throw error;
 
@@ -144,12 +156,12 @@ export async function GET(req: NextRequest) {
 }
 
 
+
 // delete call for each id
 export async function DELETE(req: NextRequest) {
   const session = await getToken({ req });
 
-  // If no session, return an error
-  if (!session) {
+  if (!session?.sub) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
     });
@@ -158,17 +170,38 @@ export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const chatId = searchParams.get("chatId");
+
     if (!chatId) {
       return new Response(JSON.stringify({ error: "Missing chatId" }), {
         status: 400,
       });
     }
+
+    const userId = session.sub;
+
+    // Check if chat belongs to user
+    const { data, error: fetchError } = await supabase
+      .from("chats")
+      .select("user_id")
+      .eq("chat_id", chatId)
+      .single();
+
+    if (fetchError) throw fetchError;
+    if (data.user_id !== userId) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+      });
+    }
+
+    // Delete chat
     const { error } = await supabase
       .from("chats")
       .delete()
-      .eq("chat_id", chatId);
+      .eq("chat_id", chatId)
+      .eq("user_id", userId);
 
     if (error) throw error;
+
     return new Response(JSON.stringify({ message: "Chat deleted" }), {
       status: 200,
     });
@@ -178,3 +211,4 @@ export async function DELETE(req: NextRequest) {
     });
   }
 }
+

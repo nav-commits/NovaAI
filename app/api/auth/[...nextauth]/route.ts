@@ -12,6 +12,7 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt" as const, 
+    maxAge: 60 * 120,
   },
   callbacks: {
     async session({ session, token }: { session: any; token: any }) {
@@ -30,6 +31,5 @@ export const authOptions = {
     },
   },
 };
-
 export const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
