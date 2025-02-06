@@ -7,13 +7,14 @@ import {
   MoreHorizontal,
   Menu,
   X,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useRouter } from "next/navigation";
-
+import { signOut } from "next-auth/react";
 interface LayoutProps {
   children: React.ReactNode;
   chats: { chat_id: string; name: string }[];
@@ -21,6 +22,8 @@ interface LayoutProps {
   selectedChatId: string | null;
   setSelectedChatId: (id: string | null) => void;
 }
+
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu"; 
 
 const Layout: FC<LayoutProps> = ({
   children,
@@ -57,7 +60,34 @@ const Layout: FC<LayoutProps> = ({
             </div>
           </Link>
         </div>
+        <div className="flex items-center justify-end p-4 fixed top-0 right-0 z-50">
+        <DropdownMenu.Root>
+  <DropdownMenu.Trigger asChild>
+    <button className="text-primary">
+      <User className="w-6 h-6" />
+    </button>
+  </DropdownMenu.Trigger>
 
+  <DropdownMenu.Content
+    align="end"
+    className="bg-white dark:bg-black text-black dark:text-white shadow-lg rounded-lg w-48 p-2"
+  >
+    <DropdownMenu.Item className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm">
+      Profile
+    </DropdownMenu.Item>
+    <DropdownMenu.Item className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm">
+      Settings
+    </DropdownMenu.Item>
+    <DropdownMenu.Item
+      className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm text-destructive dark:text-red-500"
+      onClick={() => signOut()} // Sign out using NextAuth.js
+    >
+      Log Out
+    </DropdownMenu.Item>
+  </DropdownMenu.Content>
+</DropdownMenu.Root>
+
+        </div>
         <div className="mt-8 space-y-6 flex-grow">
           <div className="space-y-3">
             <div className="text-xs font-semibold text-primary/60 px-3 flex items-center gap-2">
@@ -88,8 +118,6 @@ const Layout: FC<LayoutProps> = ({
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
                     </Dialog.Trigger>
-
-                    {/* Delete Confirmation Dialog */}
                     {/* Delete Confirmation Dialog */}
                     <Dialog.Portal>
                       <Dialog.Overlay className="fixed inset-0 bg-black/30 z-[60]" />
@@ -230,7 +258,6 @@ const Layout: FC<LayoutProps> = ({
                 </div>
               </div>
             </div>
-
             <div className="mt-auto space-y-2">
               <Button
                 variant="ghost"
@@ -247,6 +274,32 @@ const Layout: FC<LayoutProps> = ({
                 Settings
               </Button>
               <ThemeToggle />
+              <DropdownMenu.Root>
+  <DropdownMenu.Trigger asChild>
+    <button className="text-primary">
+      <User className="w-6 h-6" />
+    </button>
+  </DropdownMenu.Trigger>
+
+  <DropdownMenu.Content
+    align="end"
+    className="bg-white dark:bg-black text-black dark:text-white shadow-lg rounded-lg w-48 p-2"
+  >
+    <DropdownMenu.Item className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm">
+      Profile
+    </DropdownMenu.Item>
+    <DropdownMenu.Item className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm">
+      Settings
+    </DropdownMenu.Item>
+    <DropdownMenu.Item
+      className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm text-destructive dark:text-red-500"
+      onClick={() => signOut()} // Sign out using NextAuth.js
+    >
+      Log Out
+    </DropdownMenu.Item>
+  </DropdownMenu.Content>
+</DropdownMenu.Root>
+
             </div>
           </div>
         </div>
