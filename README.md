@@ -26,4 +26,4 @@ To run the project locally:
    git clone https://github.com/nav-commits/NovaAI.git
    cd NovaAI
    
-
+url: https://nova-ai-neon.vercel.app/
