@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 // NextAuth configuration
-export const authOptions = {
+const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
@@ -31,5 +31,12 @@ export const authOptions = {
     },
   },
 };
-export const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+
+// Define GET and POST methods for Next.js 13+ API routes
+export async function GET(req: any, res: any) {
+  return NextAuth(req, res, authOptions);
+}
+
+export async function POST(req: any, res: any) {
+  return NextAuth(req, res, authOptions);
+}
