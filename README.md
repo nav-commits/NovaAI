@@ -1,4 +1,6 @@
 
+https://github.com/user-attachments/assets/508ba08d-5aac-4a7c-87ae-b1460d0d1277
+
 
 # NovaAI - AI-Powered Chatbot with Gemma 2 & Hugging Face API
 
@@ -27,8 +29,9 @@ To run the project locally:
    ```bash
    git clone https://github.com/nav-commits/NovaAI.git
    cd NovaAI
-
+   
 ### Watch the Screen Recording
 [Click here to watch the screen recording](Screen%20Recording%202025-02-06%20at%203.53.37%20PM.mov)
+
 
 
