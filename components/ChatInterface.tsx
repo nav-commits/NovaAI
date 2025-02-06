@@ -1,10 +1,12 @@
-"use client";
+'use client'
 import { useState, useRef, useEffect } from "react";
 import { SendIcon, UserIcon, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { okaidia } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface Message {
   id: string;
@@ -33,7 +35,6 @@ export default function ChatInterface({
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-    // Set chatStarted to true once there is at least one message
     if (messages.length > 0) {
       setChatStarted(true);
     }
@@ -84,7 +85,20 @@ export default function ChatInterface({
                 <div className="text-sm font-medium">
                   {message.role === "assistant" ? "Nova AI" : "You"}
                 </div>
-                <div className="text-sm leading-relaxed">{message.content}</div>
+                <div className="text-sm leading-relaxed">
+                  {message.content.startsWith("```") ? (
+                    <div className="overflow-x-auto max-w-full h-auto"> {/* Only horizontal scrolling */}
+                      <SyntaxHighlighter
+                        language="javascript"
+                        style={okaidia}
+                      >
+                        {message.content.replace(/```/g, "")}
+                      </SyntaxHighlighter>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">{message.content}</div>
+                  )}
+                </div>
               </div>
             </div>
           ))}

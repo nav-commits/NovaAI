@@ -1,22 +1,24 @@
 "use client";
-
-import { useParams} from "next/navigation";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/layout";
 import ChatInterface from "@/components/ChatInterface";
+import { useRouter, useParams } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
 
 const ChatPage = () => {
   const { chatId } = useParams();
-  interface Message {
-    id: string;
-    content: string;
-    role: "user" | "assistant"; // Add the role to the Message interface
-  }
-
+  const { data: session } = useSession();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [chats, setChats] = useState<{ chat_id: string; name: string }[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const router = useRouter();
+
+  interface Message {
+    id: string;
+    content: string;
+    role: "user" | "assistant";
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,11 +33,13 @@ const ChatPage = () => {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
+    // Add the session token in the headers
     const fetchResponse = await fetch("http://localhost:3000/api/chat", {
       method: "POST",
       body: JSON.stringify({ input: input, chatId }),
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${session?.user?.accessToken ?? ""}`, // Add token here
       },
     });
 
@@ -55,7 +59,12 @@ const ChatPage = () => {
 
       try {
         const res = await fetch(
-          `http://localhost:3000/api/chat?chatId=${chatId}`
+          `http://localhost:3000/api/chat?chatId=${chatId}`,
+          {
+            headers: {
+              "Authorization": `Bearer ${session?.user?.accessToken ?? ""}`, // Add token here
+            },
+          }
         );
         if (!res.ok) {
           console.error("Failed to fetch:", res.statusText);
@@ -68,12 +77,16 @@ const ChatPage = () => {
       }
     };
     fetchChatById();
-  }, [chatId]);
+  }, [chatId, session]);
 
   useEffect(() => {
     async function fetchChats() {
       try {
-        const res = await fetch("http://localhost:3000/api/chat");
+        const res = await fetch("http://localhost:3000/api/chat", {
+          headers: {
+            "Authorization": `Bearer ${session?.user?.accessToken ?? ""}`, // Add token here
+          },
+        });
         if (!res.ok) throw new Error("Failed to fetch chats");
         const data = await res.json();
         setChats(data);
@@ -82,12 +95,15 @@ const ChatPage = () => {
       }
     }
     fetchChats();
-  }, []);
+  }, [session]);
 
   const handleDeleteChat = async (chatId: string) => {
     try {
       const res = await fetch(`http://localhost:3000/api/chat?chatId=${chatId}`, {
         method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${session?.user?.accessToken ?? ""}`, // Add token here
+        },
       });
 
       if (!res.ok) {
@@ -95,10 +111,26 @@ const ChatPage = () => {
       }
 
       setChats((prevChats) => prevChats.filter((chat) => chat.chat_id !== chatId));
+      router.push("/");
     } catch (error) {
       console.error("Error deleting chat:", error);
     }
   };
+
+  if (!session) {
+    // If not logged in, redirect or show a login prompt
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <h1 className="text-2xl font-bold">Please log in to access the chat</h1>
+        <button
+          onClick={() => signIn("google")}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md"
+        >
+          Sign in with Google
+        </button>
+      </div>
+    );
+  }
 
   return (
     <Layout

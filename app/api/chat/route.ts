@@ -2,6 +2,7 @@ import { HfInference } from "@huggingface/inference";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest } from "next/server";
 import { v4 as uuidv4 } from "uuid";
+import { getToken } from "next-auth/jwt";
 
 // Initialize Hugging Face client
 const apiKey = process.env.HUGGINGFACE_API_KEY;
@@ -13,41 +14,51 @@ const supabaseKey = process.env.SUPABASE_KEY as string;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Helper function to generate a unique name
-const generateUniqueName = () => {
-  const words = ["AI", "User", "Bot", "Helper", "Assistant"];
-  const randomWord = words[Math.floor(Math.random() * words.length)];
-  const randomString = uuidv4().split("-")[0];
-  return `${randomWord}-${randomString}`;
+const generateChatName = (input: string) => {
+  const cleanInput = input.replace(/[^a-zA-Z0-9 ]/g, "").trim();
+  const words = cleanInput.split(" ").slice(0, 5).join(" "); 
+  return words || `Chat-${uuidv4().split("-")[0]}`;
 };
-
 export async function POST(req: NextRequest) {
+  const session = await getToken({ req });
+
+  if (!session?.sub) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+    });
+  }
+
   try {
     const { input, chatId } = await req.json();
     let out = "";
 
-    // Call Hugging Face model API
     const stream = client.chatCompletionStream({
       model: "google/gemma-2-2b-it",
       messages: [{ role: "user", content: input }],
       max_tokens: 500,
     });
 
-    // Wait for the stream to return content
     for await (const chunk of stream) {
       if (chunk.choices && chunk.choices.length > 0) {
         out += chunk.choices[0].delta.content;
       }
     }
-    // Check if chatId exists in database
+
+    const userId = session.sub; // Unique user ID from NextAuth session
+
     if (chatId) {
-      // Append message to existing chat
       const { data, error } = await supabase
         .from("chats")
-        .select("messages")
+        .select("messages, user_id")
         .eq("chat_id", chatId)
         .single();
 
       if (error) throw error;
+      if (data.user_id !== userId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+        });
+      }
 
       const updatedMessages = [
         ...data.messages,
@@ -66,12 +77,12 @@ export async function POST(req: NextRequest) {
         status: 200,
       });
     } else {
-      // Generate new chat ID and save new conversation
       const newChatId = uuidv4();
-      const name = generateUniqueName();
+      const name = generateChatName(input);
 
       const messageData = {
         chat_id: newChatId,
+        user_id: userId,
         name,
         messages: [
           { role: "user", content: input },
@@ -96,26 +107,42 @@ export async function POST(req: NextRequest) {
   }
 }
 
+
 // get call for each id or all chats
 export async function GET(req: NextRequest) {
+  const session = await getToken({ req });
+
+  if (!session?.sub) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+    });
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const chatId = searchParams.get("chatId");
+    const userId = session.sub;
 
     if (chatId) {
-      // Fetch a specific chat by ID
       const { data, error } = await supabase
         .from("chats")
-        .select("messages")
+        .select("messages, user_id")
         .eq("chat_id", chatId)
         .single();
 
       if (error) throw error;
+      if (data.user_id !== userId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+        });
+      }
 
       return new Response(JSON.stringify(data), { status: 200 });
     } else {
-      // Fetch all chats
-      const { data, error } = await supabase.from("chats").select("*");
+      const { data, error } = await supabase
+        .from("chats")
+        .select("*")
+        .eq("user_id", userId); // Fetch only the logged-in user's chats
 
       if (error) throw error;
 
@@ -128,22 +155,53 @@ export async function GET(req: NextRequest) {
   }
 }
 
+
+
 // delete call for each id
 export async function DELETE(req: NextRequest) {
+  const session = await getToken({ req });
+
+  if (!session?.sub) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+    });
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const chatId = searchParams.get("chatId");
+
     if (!chatId) {
       return new Response(JSON.stringify({ error: "Missing chatId" }), {
         status: 400,
       });
     }
+
+    const userId = session.sub;
+
+    // Check if chat belongs to user
+    const { data, error: fetchError } = await supabase
+      .from("chats")
+      .select("user_id")
+      .eq("chat_id", chatId)
+      .single();
+
+    if (fetchError) throw fetchError;
+    if (data.user_id !== userId) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+      });
+    }
+
+    // Delete chat
     const { error } = await supabase
       .from("chats")
       .delete()
-      .eq("chat_id", chatId);
+      .eq("chat_id", chatId)
+      .eq("user_id", userId);
 
     if (error) throw error;
+
     return new Response(JSON.stringify({ message: "Chat deleted" }), {
       status: 200,
     });
@@ -153,3 +211,4 @@ export async function DELETE(req: NextRequest) {
     });
   }
 }
+
