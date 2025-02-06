@@ -23,7 +23,7 @@ interface LayoutProps {
   setSelectedChatId: (id: string | null) => void;
 }
 
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu"; 
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 const Layout: FC<LayoutProps> = ({
   children,
@@ -61,32 +61,31 @@ const Layout: FC<LayoutProps> = ({
           </Link>
         </div>
         <div className="flex items-center justify-end p-4 fixed top-0 right-0 z-50">
-        <DropdownMenu.Root>
-  <DropdownMenu.Trigger asChild>
-    <button className="text-primary">
-      <User className="w-6 h-6" />
-    </button>
-  </DropdownMenu.Trigger>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button className="text-primary">
+                <User className="w-6 h-6" />
+              </button>
+            </DropdownMenu.Trigger>
 
-  <DropdownMenu.Content
-    align="end"
-    className="bg-white dark:bg-black text-black dark:text-white shadow-lg rounded-lg w-48 p-2"
-  >
-    <DropdownMenu.Item className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm">
-      Profile
-    </DropdownMenu.Item>
-    <DropdownMenu.Item className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm">
-      Settings
-    </DropdownMenu.Item>
-    <DropdownMenu.Item
-      className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm text-destructive dark:text-red-500"
-      onClick={() => signOut()} // Sign out using NextAuth.js
-    >
-      Log Out
-    </DropdownMenu.Item>
-  </DropdownMenu.Content>
-</DropdownMenu.Root>
-
+            <DropdownMenu.Content
+              align="end"
+              className="bg-white dark:bg-black text-black dark:text-white shadow-lg rounded-lg w-48 p-2"
+            >
+              <DropdownMenu.Item className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm">
+                Profile
+              </DropdownMenu.Item>
+              <DropdownMenu.Item className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm">
+                Settings
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm text-destructive dark:text-red-500"
+                onClick={() => signOut()} // Sign out using NextAuth.js
+              >
+                Log Out
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
         </div>
         <div className="mt-8 space-y-6 flex-grow">
           <div className="space-y-3">
@@ -275,31 +274,30 @@ const Layout: FC<LayoutProps> = ({
               </Button>
               <ThemeToggle />
               <DropdownMenu.Root>
-  <DropdownMenu.Trigger asChild>
-    <button className="text-primary">
-      <User className="w-6 h-6" />
-    </button>
-  </DropdownMenu.Trigger>
+                <DropdownMenu.Trigger asChild>
+                  <button className="text-primary">
+                    <User className="w-6 h-6" />
+                  </button>
+                </DropdownMenu.Trigger>
 
-  <DropdownMenu.Content
-    align="end"
-    className="bg-white dark:bg-black text-black dark:text-white shadow-lg rounded-lg w-48 p-2"
-  >
-    <DropdownMenu.Item className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm">
-      Profile
-    </DropdownMenu.Item>
-    <DropdownMenu.Item className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm">
-      Settings
-    </DropdownMenu.Item>
-    <DropdownMenu.Item
-      className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm text-destructive dark:text-red-500"
-      onClick={() => signOut()} // Sign out using NextAuth.js
-    >
-      Log Out
-    </DropdownMenu.Item>
-  </DropdownMenu.Content>
-</DropdownMenu.Root>
-
+                <DropdownMenu.Content
+                  align="end"
+                  className="bg-white dark:bg-black text-black dark:text-white shadow-lg rounded-lg w-48 p-2"
+                >
+                  <DropdownMenu.Item className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm">
+                    Profile
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm">
+                    Settings
+                  </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    className="p-2 hover:bg-primary/10 dark:hover:bg-primary/20 cursor-pointer text-sm text-destructive dark:text-red-500"
+                    onClick={() => signOut()} // Sign out using NextAuth.js
+                  >
+                    Log Out
+                  </DropdownMenu.Item>
+                </DropdownMenu.Content>
+              </DropdownMenu.Root>
             </div>
           </div>
         </div>

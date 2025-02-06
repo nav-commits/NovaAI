@@ -34,12 +34,12 @@ const ChatPage = () => {
     setInput("");
 
     // Add the session token in the headers
-    const fetchResponse = await fetch("http://localhost:3000/api/chat", {
+    const fetchResponse = await fetch("/api/chat", {
       method: "POST",
       body: JSON.stringify({ input: input, chatId }),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${session?.user?.accessToken ?? ""}`, // Add token here
+        "Authorization": `Bearer ${session?.user?.accessToken ?? ""}`,
       },
     });
 
@@ -59,7 +59,7 @@ const ChatPage = () => {
 
       try {
         const res = await fetch(
-          `http://localhost:3000/api/chat?chatId=${chatId}`,
+          `/api/chat?chatId=${chatId}`,
           {
             headers: {
               "Authorization": `Bearer ${session?.user?.accessToken ?? ""}`, // Add token here
@@ -82,7 +82,7 @@ const ChatPage = () => {
   useEffect(() => {
     async function fetchChats() {
       try {
-        const res = await fetch("http://localhost:3000/api/chat", {
+        const res = await fetch("/api/chat", {
           headers: {
             "Authorization": `Bearer ${session?.user?.accessToken ?? ""}`, // Add token here
           },
@@ -99,7 +99,7 @@ const ChatPage = () => {
 
   const handleDeleteChat = async (chatId: string) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/chat?chatId=${chatId}`, {
+      const res = await fetch(`/api/chat?chatId=${chatId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${session?.user?.accessToken ?? ""}`, // Add token here
